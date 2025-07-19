@@ -1,13 +1,20 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Menu, X, ChevronRight } from "lucide-react";
+import { Menu, X, ChevronRight, User, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,12 +57,30 @@ const Navbar = () => {
               Lessons
             </NavLink>
             <div className="w-px h-6 bg-gray-200"></div>
-            <Link
-              to="/lessons"
-              className="px-4 py-2 rounded-md bg-primary text-white font-medium transition-all duration-300 hover:bg-primary/90 hover:scale-105"
-            >
-              Start Learning
-            </Link>
+            
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
+                    <User className="h-4 w-4" />
+                    {user.email}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={signOut} className="flex items-center gap-2">
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link
+                to="/auth"
+                className="px-4 py-2 rounded-md bg-primary text-white font-medium transition-all duration-300 hover:bg-primary/90 hover:scale-105"
+              >
+                Sign In
+              </Link>
+            )}
           </nav>
 
           {/* Mobile menu button */}
@@ -83,14 +108,35 @@ const Navbar = () => {
             Lessons
           </MobileNavLink>
           <div className="w-full h-px bg-gray-200 my-2"></div>
-          <Link
-            to="/lessons"
-            className="flex items-center justify-between px-4 py-3 rounded-md bg-primary text-white font-medium"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            <span>Start Learning</span>
-            <ChevronRight size={18} />
-          </Link>
+          
+          {user ? (
+            <div className="space-y-4">
+              <div className="px-4 py-2 text-sm text-gray-600">
+                Signed in as: {user.email}
+              </div>
+              <button
+                onClick={() => {
+                  signOut();
+                  setIsMenuOpen(false);
+                }}
+                className="flex items-center justify-between px-4 py-3 rounded-md bg-gray-100 text-gray-700 font-medium transition-colors hover:bg-gray-200"
+              >
+                <span className="flex items-center gap-2">
+                  <LogOut size={18} />
+                  Sign Out
+                </span>
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/auth"
+              className="flex items-center justify-between px-4 py-3 rounded-md bg-primary text-white font-medium"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <span>Sign In</span>
+              <ChevronRight size={18} />
+            </Link>
+          )}
         </nav>
       </div>
     </header>

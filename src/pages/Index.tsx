@@ -7,8 +7,10 @@ import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
 import { lessons } from "@/data/lessons";
 import LessonCard from "@/components/LessonCard";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const featuredLessons = lessons.slice(0, 3);
 
@@ -62,12 +64,33 @@ const Index = () => {
                 </p>
                 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  {user ? (
+                    <button 
+                      onClick={() => navigate('/lessons')}
+                      className="px-6 py-3 bg-primary text-white font-medium rounded-md shadow-sm hover:bg-primary/90 transition-all duration-300 hover:shadow focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
+                    >
+                      <span className="flex items-center gap-2">
+                        Continue Learning
+                        <ArrowRight size={16} />
+                      </span>
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => navigate('/auth')}
+                      className="px-6 py-3 bg-primary text-white font-medium rounded-md shadow-sm hover:bg-primary/90 transition-all duration-300 hover:shadow focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
+                    >
+                      <span className="flex items-center gap-2">
+                        Get Started
+                        <ArrowRight size={16} />
+                      </span>
+                    </button>
+                  )}
                   <button 
                     onClick={() => navigate('/lessons')}
-                    className="px-6 py-3 bg-primary text-white font-medium rounded-md shadow-sm hover:bg-primary/90 transition-all duration-300 hover:shadow focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
+                    className="px-6 py-3 bg-white text-primary font-medium rounded-md border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
                   >
                     <span className="flex items-center gap-2">
-                      Start Learning
+                      Browse Lessons
                       <ArrowRight size={16} />
                     </span>
                   </button>
