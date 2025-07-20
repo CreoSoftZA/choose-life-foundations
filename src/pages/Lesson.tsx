@@ -189,7 +189,7 @@ const Lesson = () => {
                     <div></div>
                   )}
                   
-                  {nextLesson ? (
+                  {isCompleted && nextLesson ? (
                     <Link
                       to={`/lessons/${nextLesson.slug}`}
                       className="flex items-center justify-center sm:justify-end gap-2 px-4 py-2 rounded-md bg-primary text-white hover:bg-primary/90 transition-colors w-full sm:w-auto"
@@ -197,6 +197,10 @@ const Lesson = () => {
                       <span>Next: {nextLesson.title}</span>
                       <ChevronRight size={16} />
                     </Link>
+                  ) : !isCompleted ? (
+                    <div className="flex items-center justify-center text-gray-400 text-sm w-full sm:w-auto">
+                      Complete this lesson to unlock the next one
+                    </div>
                   ) : (
                     <Link
                       to="/lessons"
