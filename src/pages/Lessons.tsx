@@ -1,12 +1,35 @@
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
 import LessonCard from "@/components/LessonCard";
 import { lessons } from "@/data/lessons";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const Lessons = () => {
+  const { user } = useAuth();
+  const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const fetchCompletedLessons = async () => {
+      if (user) {
+        const { data } = await supabase
+          .from('lesson_progress')
+          .select('lesson_id')
+          .eq('user_id', user.id);
+        
+        if (data) {
+          setCompletedLessons(new Set(data.map(item => item.lesson_id)));
+        }
+      }
+    };
+
+    fetchCompletedLessons();
+  }, [user]);
+
   return (
     <PageTransition>
       <div className="flex flex-col min-h-screen">
@@ -40,7 +63,12 @@ const Lessons = () => {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {lessons.map((lesson, index) => (
-                <LessonCard key={lesson.id} lesson={lesson} index={index} />
+                <LessonCard 
+                  key={lesson.id} 
+                  lesson={lesson} 
+                  index={index} 
+                  isCompleted={completedLessons.has(lesson.id.toString())}
+                />
               ))}
             </div>
           </div>
