@@ -66,15 +66,7 @@ export type Database = {
           lesson_id?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "lesson_progress_lesson_id_fkey"
-            columns: ["lesson_id"]
-            isOneToOne: false
-            referencedRelation: "lessons"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       lessons: {
         Row: {
