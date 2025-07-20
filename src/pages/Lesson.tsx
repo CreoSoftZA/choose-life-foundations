@@ -2,40 +2,95 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { lessons } from "@/data/lessons";
 import { type Lesson as LessonType } from "@/data/lessons";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
 
 const Lesson = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [lesson, setLesson] = useState<LessonType | null>(null);
   const [nextLesson, setNextLesson] = useState<LessonType | null>(null);
   const [prevLesson, setPrevLesson] = useState<LessonType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [isMarking, setIsMarking] = useState(false);
 
   useEffect(() => {
-    if (slug) {
-      setIsLoading(true);
-      const foundLesson = lessons.find((l) => l.slug === slug);
-      
-      if (foundLesson) {
-        setLesson(foundLesson);
+    const loadLessonAndProgress = async () => {
+      if (slug) {
+        setIsLoading(true);
+        const foundLesson = lessons.find((l) => l.slug === slug);
         
-        // Find next lesson
-        const nextIndex = foundLesson.id < lessons.length ? foundLesson.id : null;
-        setNextLesson(nextIndex ? lessons.find((l) => l.id === nextIndex + 1) || null : null);
+        if (foundLesson) {
+          setLesson(foundLesson);
+          
+          // Find next lesson
+          const nextIndex = foundLesson.id < lessons.length ? foundLesson.id : null;
+          setNextLesson(nextIndex ? lessons.find((l) => l.id === nextIndex + 1) || null : null);
+          
+          // Find previous lesson
+          const prevIndex = foundLesson.id > 1 ? foundLesson.id - 2 : null;
+          setPrevLesson(prevIndex !== null ? lessons.find((l) => l.id === prevIndex + 1) || null : null);
+          
+          // Check if lesson is completed by current user
+          if (user) {
+            const { data } = await supabase
+              .from('lesson_progress')
+              .select('id')
+              .eq('user_id', user.id)
+              .eq('lesson_id', foundLesson.id.toString())
+              .maybeSingle();
+            
+            setIsCompleted(!!data);
+          }
+        }
         
-        // Find previous lesson
-        const prevIndex = foundLesson.id > 1 ? foundLesson.id - 2 : null;
-        setPrevLesson(prevIndex !== null ? lessons.find((l) => l.id === prevIndex + 1) || null : null);
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
+    };
+
+    loadLessonAndProgress();
+  }, [slug, user]);
+
+  const handleMarkComplete = async () => {
+    if (!user || !lesson || isCompleted) return;
+    
+    setIsMarking(true);
+    try {
+      const { error } = await supabase
+        .from('lesson_progress')
+        .insert({
+          user_id: user.id,
+          lesson_id: lesson.id.toString(),
+        });
+
+      if (error) throw error;
+
+      setIsCompleted(true);
+      toast({
+        title: "Lesson completed!",
+        description: `You've successfully completed "${lesson.title}".`,
+      });
+    } catch (error) {
+      console.error('Error marking lesson as complete:', error);
+      toast({
+        title: "Error",
+        description: "Failed to mark lesson as complete. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsMarking(false);
     }
-  }, [slug]);
+  };
 
   if (isLoading) {
     return (
@@ -100,6 +155,25 @@ const Lesson = () => {
                 className="prose prose-blue max-w-none"
                 dangerouslySetInnerHTML={{ __html: lesson.content }}
               />
+              
+              {user && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.4 }}
+                  className="mt-8 flex justify-center"
+                >
+                  <Button
+                    onClick={handleMarkComplete}
+                    disabled={isCompleted || isMarking}
+                    variant={isCompleted ? "secondary" : "default"}
+                    className="flex items-center gap-2"
+                  >
+                    <Check size={16} />
+                    {isCompleted ? "Completed" : isMarking ? "Marking..." : "Mark as Complete"}
+                  </Button>
+                </motion.div>
+              )}
               
               <div className="mt-12 pt-8 border-t border-gray-200">
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
