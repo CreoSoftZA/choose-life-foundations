@@ -75,6 +75,12 @@ const Navbar = () => {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      My Profile
+                    </Link>
+                  </DropdownMenuItem>
                   {isAdmin && (
                     <DropdownMenuItem asChild>
                       <Link to="/admin" className="flex items-center gap-2">
@@ -135,6 +141,17 @@ const Navbar = () => {
               <div className="px-4 py-2 text-sm text-gray-600">
                 Signed in as: {user.email}
               </div>
+              <Link
+                to="/profile"
+                className="flex items-center justify-between px-4 py-3 rounded-md bg-gray-100 text-gray-700 font-medium transition-colors hover:bg-gray-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <span className="flex items-center gap-2">
+                  <User size={18} />
+                  My Profile
+                </span>
+                <ChevronRight size={18} />
+              </Link>
               <button
                 onClick={() => {
                   signOut();

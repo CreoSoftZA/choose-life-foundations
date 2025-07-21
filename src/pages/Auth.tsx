@@ -22,7 +22,11 @@ const signInSchema = z.object({
 const signUpSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  displayName: z.string().min(2, 'Display name must be at least 2 characters').optional()
+  firstName: z.string().min(2, 'First name must be at least 2 characters'),
+  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
+  contactNumber: z.string().min(10, 'Contact number must be at least 10 digits').optional(),
+  age: z.string().transform(val => val ? parseInt(val) : undefined).refine(val => !val || (val >= 13 && val <= 120), 'Age must be between 13 and 120').optional(),
+  maritalStatus: z.enum(['single', 'married', 'divorced', 'widowed', 'other']).optional()
 });
 
 type SignInForm = z.infer<typeof signInSchema>;
@@ -46,7 +50,11 @@ const Auth = () => {
     defaultValues: {
       email: '',
       password: '',
-      displayName: ''
+      firstName: '',
+      lastName: '',
+      contactNumber: '',
+      age: undefined,
+      maritalStatus: undefined
     }
   });
 
@@ -67,7 +75,7 @@ const Auth = () => {
 
   const onSignUp = async (data: SignUpForm) => {
     setIsLoading(true);
-    const { error } = await signUp(data.email, data.password, data.displayName);
+    const { error } = await signUp(data.email, data.password, data.firstName, data.lastName, data.contactNumber, data.age, data.maritalStatus);
     setIsLoading(false);
   };
 
@@ -149,23 +157,42 @@ const Auth = () => {
                 <TabsContent value="signup" className="space-y-4">
                   <Form {...signUpForm}>
                     <form onSubmit={signUpForm.handleSubmit(onSignUp)} className="space-y-4">
-                      <FormField
-                        control={signUpForm.control}
-                        name="displayName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Display Name (Optional)</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="Enter your display name" 
-                                {...field} 
-                                disabled={isLoading}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={signUpForm.control}
+                          name="firstName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>First Name</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="First name" 
+                                  {...field} 
+                                  disabled={isLoading}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={signUpForm.control}
+                          name="lastName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Last Name</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="Last name" 
+                                  {...field} 
+                                  disabled={isLoading}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                       <FormField
                         control={signUpForm.control}
                         name="email"
@@ -202,6 +229,68 @@ const Auth = () => {
                           </FormItem>
                         )}
                       />
+                      <FormField
+                        control={signUpForm.control}
+                        name="contactNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Contact Number (Optional)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Your contact number" 
+                                type="tel" 
+                                {...field} 
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={signUpForm.control}
+                          name="age"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Age (Optional)</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="Your age" 
+                                  type="number" 
+                                  {...field} 
+                                  disabled={isLoading}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={signUpForm.control}
+                          name="maritalStatus"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Marital Status (Optional)</FormLabel>
+                              <FormControl>
+                                <select 
+                                  {...field} 
+                                  disabled={isLoading}
+                                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                  <option value="">Select status</option>
+                                  <option value="single">Single</option>
+                                  <option value="married">Married</option>
+                                  <option value="divorced">Divorced</option>
+                                  <option value="widowed">Widowed</option>
+                                  <option value="other">Other</option>
+                                </select>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                       <Button 
                         type="submit" 
                         className="w-full" 
