@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Menu, X, ChevronRight, User, LogOut } from "lucide-react";
+import { Menu, X, ChevronRight, User, LogOut, Shield } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import {
   DropdownMenu,
@@ -15,6 +15,9 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
+  
+  // Simple admin check - you might want to implement proper role-based auth
+  const isAdmin = user?.email?.endsWith('@admin.com') || user?.email === 'admin@example.com';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,6 +59,11 @@ const Navbar = () => {
             <NavLink to="/lessons" active={location.pathname.includes("/lessons")}>
               Lessons
             </NavLink>
+            {isAdmin && (
+              <NavLink to="/admin" active={location.pathname === "/admin"}>
+                Admin
+              </NavLink>
+            )}
             <div className="w-px h-6 bg-gray-200"></div>
             
             {user ? (
@@ -67,6 +75,14 @@ const Navbar = () => {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="flex items-center gap-2">
+                        <Shield className="h-4 w-4" />
+                        Admin Panel
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={signOut} className="flex items-center gap-2">
                     <LogOut className="h-4 w-4" />
                     Sign Out
@@ -107,6 +123,11 @@ const Navbar = () => {
           <MobileNavLink to="/lessons" active={location.pathname.includes("/lessons")}>
             Lessons
           </MobileNavLink>
+          {isAdmin && (
+            <MobileNavLink to="/admin" active={location.pathname === "/admin"}>
+              Admin
+            </MobileNavLink>
+          )}
           <div className="w-full h-px bg-gray-200 my-2"></div>
           
           {user ? (

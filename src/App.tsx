@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Lessons from "./pages/Lessons";
 import Lesson from "./pages/Lesson";
 import Auth from "./pages/Auth";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 import { AuthProvider } from "./hooks/useAuth";
@@ -29,6 +30,7 @@ const App = () => (
               <Route path="/lessons" element={<Lessons />} />
               <Route path="/lessons/:slug" element={<Lesson />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/admin" element={<Admin />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AnimatePresence>
