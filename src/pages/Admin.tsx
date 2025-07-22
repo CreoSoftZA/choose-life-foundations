@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
@@ -28,6 +29,7 @@ interface DatabaseLesson {
 
 const Admin = () => {
   const { user, loading } = useAuth();
+  const { isAdmin } = useProfile();
   const { toast } = useToast();
   const [lessons, setLessons] = useState<DatabaseLesson[]>([]);
   const [selectedLesson, setSelectedLesson] = useState<DatabaseLesson | null>(null);
@@ -41,8 +43,6 @@ const Admin = () => {
     is_published: true
   });
 
-  // Simple admin check - you might want to implement proper role-based auth
-  const isAdmin = user?.email?.endsWith('@admin.com') || user?.email === 'admin@example.com';
 
   useEffect(() => {
     if (user && isAdmin) {

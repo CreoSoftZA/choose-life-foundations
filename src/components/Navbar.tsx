@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Menu, X, ChevronRight, User, LogOut, Shield } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,9 +16,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
-  
-  // Simple admin check - you might want to implement proper role-based auth
-  const isAdmin = user?.email?.endsWith('@admin.com') || user?.email === 'admin@example.com';
+  const { isAdmin } = useProfile();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,9 +55,11 @@ const Navbar = () => {
             <NavLink to="/" active={location.pathname === "/"}>
               Home
             </NavLink>
-            <NavLink to="/lessons" active={location.pathname.includes("/lessons")}>
-              Lessons
-            </NavLink>
+            {user && (
+              <NavLink to="/lessons" active={location.pathname.includes("/lessons")}>
+                Lessons
+              </NavLink>
+            )}
             {isAdmin && (
               <NavLink to="/admin" active={location.pathname === "/admin"}>
                 Admin
@@ -126,9 +127,11 @@ const Navbar = () => {
           <MobileNavLink to="/" active={location.pathname === "/"}>
             Home
           </MobileNavLink>
-          <MobileNavLink to="/lessons" active={location.pathname.includes("/lessons")}>
-            Lessons
-          </MobileNavLink>
+          {user && (
+            <MobileNavLink to="/lessons" active={location.pathname.includes("/lessons")}>
+              Lessons
+            </MobileNavLink>
+          )}
           {isAdmin && (
             <MobileNavLink to="/admin" active={location.pathname === "/admin"}>
               Admin
