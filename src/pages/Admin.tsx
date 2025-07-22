@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import MDEditor from '@uiw/react-md-editor';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { Edit, Save, Plus, Eye, Trash2, ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -273,15 +274,22 @@ const Admin = () => {
                     </div>
 
                     <div>
-                      <Label>Content (Markdown)</Label>
-                      <div className="mt-2" data-color-mode="light">
-                        <MDEditor
-                          value={editForm.content}
-                          onChange={(val) => setEditForm({ ...editForm, content: val || '' })}
-                          preview="edit"
-                          height={400}
-                        />
-                      </div>
+                      <Label>Content</Label>
+                      <ReactQuill
+                        value={editForm.content}
+                        onChange={(value) => setEditForm(prev => ({ ...prev, content: value }))}
+                        theme="snow"
+                        style={{ height: '300px', marginBottom: '50px' }}
+                        modules={{
+                          toolbar: [
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            ['link', 'image'],
+                            ['clean']
+                          ]
+                        }}
+                      />
                     </div>
 
                     <div className="flex justify-end space-x-4">

@@ -170,7 +170,7 @@ const Lesson = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.4, delay: 0.2 }}
-                className="prose prose-blue max-w-none"
+                className="prose prose-blue max-w-none rich-text-content"
                 dangerouslySetInnerHTML={{ __html: lesson.content }}
               />
               
