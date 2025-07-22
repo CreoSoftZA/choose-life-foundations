@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
-import { lessons } from "@/data/lessons";
 import { type Lesson as LessonType } from "@/data/lessons";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,29 +27,48 @@ const Lesson = () => {
     const loadLessonAndProgress = async () => {
       if (slug) {
         setIsLoading(true);
-        const foundLesson = lessons.find((l) => l.slug === slug);
         
-        if (foundLesson) {
-          setLesson(foundLesson);
+        // Fetch all lessons from database
+        const { data: lessonsData } = await supabase
+          .from('lessons')
+          .select('*')
+          .eq('is_published', true)
+          .order('lesson_order');
+        
+        if (lessonsData) {
+          // Convert to client format
+          const formattedLessons = lessonsData.map(lesson => ({
+            id: lesson.lesson_order,
+            title: lesson.title,
+            slug: lesson.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+            description: lesson.description || '',
+            content: lesson.content || ''
+          }));
           
-          // Find next lesson
-          const nextIndex = foundLesson.id < lessons.length ? foundLesson.id : null;
-          setNextLesson(nextIndex ? lessons.find((l) => l.id === nextIndex + 1) || null : null);
+          const foundLesson = formattedLessons.find((l) => l.slug === slug);
           
-          // Find previous lesson
-          const prevIndex = foundLesson.id > 1 ? foundLesson.id - 2 : null;
-          setPrevLesson(prevIndex !== null ? lessons.find((l) => l.id === prevIndex + 1) || null : null);
-          
-          // Check if lesson is completed by current user
-          if (user) {
-            const { data } = await supabase
-              .from('lesson_progress')
-              .select('id')
-              .eq('user_id', user.id)
-              .eq('lesson_id', foundLesson.id.toString())
-              .maybeSingle();
+          if (foundLesson) {
+            setLesson(foundLesson);
             
-            setIsCompleted(!!data);
+            // Find next lesson
+            const nextIndex = foundLesson.id < formattedLessons.length ? foundLesson.id : null;
+            setNextLesson(nextIndex ? formattedLessons.find((l) => l.id === nextIndex + 1) || null : null);
+            
+            // Find previous lesson
+            const prevIndex = foundLesson.id > 1 ? foundLesson.id - 2 : null;
+            setPrevLesson(prevIndex !== null ? formattedLessons.find((l) => l.id === prevIndex + 1) || null : null);
+            
+            // Check if lesson is completed by current user
+            if (user) {
+              const { data } = await supabase
+                .from('lesson_progress')
+                .select('id')
+                .eq('user_id', user.id)
+                .eq('lesson_id', foundLesson.id.toString())
+                .maybeSingle();
+              
+              setIsCompleted(!!data);
+            }
           }
         }
         
