@@ -8,11 +8,50 @@ import PageTransition from "@/components/PageTransition";
 import { lessons } from "@/data/lessons";
 import LessonCard from "@/components/LessonCard";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 
 const Index = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const featuredLessons = lessons.slice(0, 3);
+  const [uncompletedLessons, setUncompletedLessons] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchUncompletedLessons = async () => {
+      if (!user) return;
+
+      try {
+        // Get completed lesson IDs
+        const { data: completedProgress } = await supabase
+          .from('lesson_progress')
+          .select('lesson_id')
+          .eq('user_id', user.id);
+
+        const completedLessonIds = completedProgress?.map(p => p.lesson_id) || [];
+
+        // Get all lessons from database
+        const { data: allLessons } = await supabase
+          .from('lessons')
+          .select('*')
+          .eq('is_published', true)
+          .order('lesson_order');
+
+        if (allLessons) {
+          // Filter out completed lessons and take first 3
+          const uncompleted = allLessons
+            .filter(lesson => !completedLessonIds.includes(lesson.id))
+            .slice(0, 3);
+          setUncompletedLessons(uncompleted);
+        }
+      } catch (error) {
+        console.error('Error fetching lessons:', error);
+        // Fallback to static lessons
+        setUncompletedLessons(lessons.slice(0, 3));
+      }
+    };
+
+    fetchUncompletedLessons();
+  }, [user]);
 
   const features = [
     {
@@ -141,7 +180,7 @@ const Index = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {featuredLessons.map((lesson, index) => (
+                {uncompletedLessons.map((lesson, index) => (
                   <LessonCard key={lesson.id} lesson={lesson} index={index} />
                 ))}
               </div>
@@ -161,28 +200,30 @@ const Index = () => {
           </section>
         )}
         
-        {/* CTA Section */}
-        <section className="py-16 md:py-24 bg-gradient-to-r from-primary/90 to-primary">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-3xl md:text-4xl font-serif font-bold text-white mb-6">
-                Ready to Deepen Your Faith?
-              </h2>
-              <p className="text-xl text-white/90 mb-8">
-                Join thousands of believers who have strengthened their spiritual foundation through these lessons.
-              </p>
-              <button 
-                onClick={() => navigate('/lessons')}
-                className="px-8 py-4 bg-white text-primary font-medium rounded-md shadow-md hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-primary"
-              >
-                <span className="flex items-center gap-2">
-                  Start Your First Lesson
-                  <ArrowRight size={16} />
-                </span>
-              </button>
+        {/* CTA Section - Only for non-authenticated users */}
+        {!user && (
+          <section className="py-16 md:py-24 bg-gradient-to-r from-primary/90 to-primary">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="max-w-4xl mx-auto text-center">
+                <h2 className="text-3xl md:text-4xl font-serif font-bold text-white mb-6">
+                  Ready to Deepen Your Faith?
+                </h2>
+                <p className="text-xl text-white/90 mb-8">
+                  Join thousands of believers who have strengthened their spiritual foundation through these lessons.
+                </p>
+                <button 
+                  onClick={() => navigate('/auth')}
+                  className="px-8 py-4 bg-white text-primary font-medium rounded-md shadow-md hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-primary"
+                >
+                  <span className="flex items-center gap-2">
+                    Start Your First Lesson
+                    <ArrowRight size={16} />
+                  </span>
+                </button>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
         
         <Footer />
       </div>
