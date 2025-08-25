@@ -14,7 +14,13 @@ const Index = () => {
     user
   } = useAuth();
   const navigate = useNavigate();
-  const [uncompletedLessons, setUncompletedLessons] = useState<any[]>([]);
+  const [uncompletedLessons, setUncompletedLessons] = useState<Array<{
+    id: string;
+    title: string;
+    slug: string;
+    description: string;
+    content: string;
+  }>>([]);
   useEffect(() => {
     const fetchUncompletedLessons = async () => {
       if (!user) return;
@@ -30,14 +36,30 @@ const Index = () => {
           data: allLessons
         } = await supabase.from('lessons').select('*').eq('is_published', true).order('lesson_order');
         if (allLessons) {
+          // Convert to client format with slugs
+          const formattedLessons = allLessons.map(lesson => ({
+            id: lesson.id,
+            title: lesson.title,
+            slug: lesson.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+            description: lesson.description || '',
+            content: lesson.content || ''
+          }));
+          
           // Filter out completed lessons and take first 3
-          const uncompleted = allLessons.filter(lesson => !completedLessonIds.includes(lesson.id)).slice(0, 3);
+          const uncompleted = formattedLessons.filter(lesson => !completedLessonIds.includes(lesson.id)).slice(0, 3);
           setUncompletedLessons(uncompleted);
         }
       } catch (error) {
         console.error('Error fetching lessons:', error);
-        // Fallback to static lessons
-        setUncompletedLessons(lessons.slice(0, 3));
+        // Fallback to static lessons with proper format
+        const fallbackLessons = lessons.slice(0, 3).map(lesson => ({
+          id: lesson.id.toString(),
+          title: lesson.title,
+          slug: lesson.slug,
+          description: lesson.description,
+          content: lesson.content
+        }));
+        setUncompletedLessons(fallbackLessons);
       }
     };
     fetchUncompletedLessons();
@@ -157,7 +179,13 @@ const Index = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {uncompletedLessons.map((lesson, index) => <LessonCard key={lesson.id} lesson={lesson} index={index} />)}
+                {uncompletedLessons.map((lesson, index) => <LessonCard key={lesson.id} lesson={{
+                  id: parseInt(lesson.id) || 0,
+                  title: lesson.title,
+                  slug: lesson.slug,
+                  description: lesson.description,
+                  content: lesson.content
+                }} index={index} />)}
               </div>
               
               <div className="text-center mt-12">
