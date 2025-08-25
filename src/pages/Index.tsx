@@ -45,8 +45,8 @@ const Index = () => {
             content: lesson.content || ''
           }));
           
-          // Filter out completed lessons and take first 3
-          const uncompleted = formattedLessons.filter(lesson => !completedLessonIds.includes(lesson.id)).slice(0, 3);
+          // Filter out completed lessons
+          const uncompleted = formattedLessons.filter(lesson => !completedLessonIds.includes(lesson.id));
           setUncompletedLessons(uncompleted);
         }
       } catch (error) {
