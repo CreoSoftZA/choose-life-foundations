@@ -166,38 +166,6 @@ const Index = () => {
           </div>
         </section>
         
-        {/* Featured Lessons Section - Only for authenticated users with uncompleted lessons */}
-        {user && uncompletedLessons.length > 0 && <section className="py-16 md:py-24 bg-gray-50">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="max-w-3xl mx-auto text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-4">
-                  Continue Your Journey
-                </h2>
-                <p className="text-lg text-gray-600 mb-8">
-                  Explore our most fundamental lessons to start building your spiritual foundation.
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {uncompletedLessons.map((lesson, index) => <LessonCard key={lesson.id} lesson={{
-                  id: parseInt(lesson.id) || 0,
-                  title: lesson.title,
-                  slug: lesson.slug,
-                  description: lesson.description,
-                  content: lesson.content
-                }} index={index} />)}
-              </div>
-              
-              <div className="text-center mt-12">
-                <button onClick={() => navigate('/lessons')} className="px-6 py-3 bg-white text-primary font-medium rounded-md border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2">
-                  <span className="flex items-center gap-2">
-                    View All Lessons
-                    <ArrowRight size={16} />
-                  </span>
-                </button>
-              </div>
-            </div>
-          </section>}
         
         {/* CTA Section - Only for non-authenticated users */}
         {!user && <section className="py-16 md:py-24 bg-gradient-to-r from-primary/90 to-primary">
