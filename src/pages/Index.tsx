@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, BookOpen, Heart, Users } from "lucide-react";
@@ -10,37 +9,29 @@ import LessonCard from "@/components/LessonCard";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
-
 const Index = () => {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const navigate = useNavigate();
   const [uncompletedLessons, setUncompletedLessons] = useState<any[]>([]);
-
   useEffect(() => {
     const fetchUncompletedLessons = async () => {
       if (!user) return;
-
       try {
         // Get completed lesson IDs
-        const { data: completedProgress } = await supabase
-          .from('lesson_progress')
-          .select('lesson_id')
-          .eq('user_id', user.id);
-
+        const {
+          data: completedProgress
+        } = await supabase.from('lesson_progress').select('lesson_id').eq('user_id', user.id);
         const completedLessonIds = completedProgress?.map(p => p.lesson_id) || [];
 
         // Get all lessons from database
-        const { data: allLessons } = await supabase
-          .from('lessons')
-          .select('*')
-          .eq('is_published', true)
-          .order('lesson_order');
-
+        const {
+          data: allLessons
+        } = await supabase.from('lessons').select('*').eq('is_published', true).order('lesson_order');
         if (allLessons) {
           // Filter out completed lessons and take first 3
-          const uncompleted = allLessons
-            .filter(lesson => !completedLessonIds.includes(lesson.id))
-            .slice(0, 3);
+          const uncompleted = allLessons.filter(lesson => !completedLessonIds.includes(lesson.id)).slice(0, 3);
           setUncompletedLessons(uncompleted);
         }
       } catch (error) {
@@ -49,30 +40,22 @@ const Index = () => {
         setUncompletedLessons(lessons.slice(0, 3));
       }
     };
-
     fetchUncompletedLessons();
   }, [user]);
-
-  const features = [
-    {
-      icon: <BookOpen className="h-6 w-6 text-primary" />,
-      title: "Biblical Foundation",
-      description: "Lessons based directly on Scripture to build a solid foundation for your faith."
-    },
-    {
-      icon: <Users className="h-6 w-6 text-primary" />,
-      title: "Spiritual Growth",
-      description: "Practical teachings that help you grow in your relationship with God and others."
-    },
-    {
-      icon: <Heart className="h-6 w-6 text-primary" />,
-      title: "Life Application",
-      description: "Learn how to apply biblical principles to your everyday life and decisions."
-    }
-  ];
-
-  return (
-    <PageTransition>
+  const features = [{
+    icon: <BookOpen className="h-6 w-6 text-primary" />,
+    title: "Biblical Foundation",
+    description: "Lessons based directly on Scripture to build a solid foundation for your faith."
+  }, {
+    icon: <Users className="h-6 w-6 text-primary" />,
+    title: "Spiritual Growth",
+    description: "Practical teachings that help you grow in your relationship with God and others."
+  }, {
+    icon: <Heart className="h-6 w-6 text-primary" />,
+    title: "Life Application",
+    description: "Learn how to apply biblical principles to your everyday life and decisions."
+  }];
+  return <PageTransition>
       <div className="flex flex-col min-h-screen">
         <Navbar />
         
@@ -85,11 +68,15 @@ const Index = () => {
           
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="max-w-4xl mx-auto text-center">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
+              <motion.div initial={{
+              opacity: 0,
+              y: 20
+            }} animate={{
+              opacity: 1,
+              y: 0
+            }} transition={{
+              duration: 0.5
+            }}>
                 <span className="inline-block px-3 py-1 text-sm font-medium text-primary bg-primary/10 rounded-full mb-6">
                   Choose Life Church
                 </span>
@@ -103,27 +90,17 @@ const Index = () => {
                 </p>
                 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  {user ? (
-                    <button 
-                      onClick={() => navigate('/lessons')}
-                      className="px-6 py-3 bg-primary text-white font-medium rounded-md shadow-sm hover:bg-primary/90 transition-all duration-300 hover:shadow focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
-                    >
+                  {user ? <button onClick={() => navigate('/lessons')} className="px-6 py-3 bg-primary text-white font-medium rounded-md shadow-sm hover:bg-primary/90 transition-all duration-300 hover:shadow focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2">
                       <span className="flex items-center gap-2">
                         Continue Learning
                         <ArrowRight size={16} />
                       </span>
-                    </button>
-                  ) : (
-                    <button 
-                      onClick={() => navigate('/auth')}
-                      className="px-6 py-3 bg-primary text-white font-medium rounded-md shadow-sm hover:bg-primary/90 transition-all duration-300 hover:shadow focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
-                    >
+                    </button> : <button onClick={() => navigate('/auth')} className="px-6 py-3 bg-primary text-white font-medium rounded-md shadow-sm hover:bg-primary/90 transition-all duration-300 hover:shadow focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2">
                       <span className="flex items-center gap-2">
                         Get Started
                         <ArrowRight size={16} />
                       </span>
-                    </button>
-                  )}
+                    </button>}
                 </div>
               </motion.div>
             </div>
@@ -143,14 +120,16 @@ const Index = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {features.map((feature, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                  className="bg-white p-6 rounded-lg shadow-elegant border border-gray-100"
-                >
+              {features.map((feature, index) => <motion.div key={index} initial={{
+              opacity: 0,
+              y: 20
+            }} animate={{
+              opacity: 1,
+              y: 0
+            }} transition={{
+              duration: 0.3,
+              delay: index * 0.1
+            }} className="bg-white p-6 rounded-lg shadow-elegant border border-gray-100">
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                     {feature.icon}
                   </div>
@@ -160,15 +139,13 @@ const Index = () => {
                   <p className="text-gray-600">
                     {feature.description}
                   </p>
-                </motion.div>
-              ))}
+                </motion.div>)}
             </div>
           </div>
         </section>
         
         {/* Featured Lessons Section - Only for authenticated users */}
-        {user && (
-          <section className="py-16 md:py-24 bg-gray-50">
+        {user && <section className="py-16 md:py-24 bg-gray-50">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="max-w-3xl mx-auto text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-4">
@@ -180,16 +157,11 @@ const Index = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {uncompletedLessons.map((lesson, index) => (
-                  <LessonCard key={lesson.id} lesson={lesson} index={index} />
-                ))}
+                {uncompletedLessons.map((lesson, index) => <LessonCard key={lesson.id} lesson={lesson} index={index} />)}
               </div>
               
               <div className="text-center mt-12">
-                <button 
-                  onClick={() => navigate('/lessons')}
-                  className="px-6 py-3 bg-white text-primary font-medium rounded-md border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
-                >
+                <button onClick={() => navigate('/lessons')} className="px-6 py-3 bg-white text-primary font-medium rounded-md border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2">
                   <span className="flex items-center gap-2">
                     View All Lessons
                     <ArrowRight size={16} />
@@ -197,24 +169,17 @@ const Index = () => {
                 </button>
               </div>
             </div>
-          </section>
-        )}
+          </section>}
         
         {/* CTA Section - Only for non-authenticated users */}
-        {!user && (
-          <section className="py-16 md:py-24 bg-gradient-to-r from-primary/90 to-primary">
+        {!user && <section className="py-16 md:py-24 bg-gradient-to-r from-primary/90 to-primary">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="max-w-4xl mx-auto text-center">
                 <h2 className="text-3xl md:text-4xl font-serif font-bold text-white mb-6">
                   Ready to Deepen Your Faith?
                 </h2>
-                <p className="text-xl text-white/90 mb-8">
-                  Join thousands of believers who have strengthened their spiritual foundation through these lessons.
-                </p>
-                <button 
-                  onClick={() => navigate('/auth')}
-                  className="px-8 py-4 bg-white text-primary font-medium rounded-md shadow-md hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-primary"
-                >
+                <p className="text-xl text-white/90 mb-8">Join us and strengthen your spiritual foundation through these lessons.</p>
+                <button onClick={() => navigate('/auth')} className="px-8 py-4 bg-white text-primary font-medium rounded-md shadow-md hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-primary">
                   <span className="flex items-center gap-2">
                     Start Your First Lesson
                     <ArrowRight size={16} />
@@ -222,13 +187,10 @@ const Index = () => {
                 </button>
               </div>
             </div>
-          </section>
-        )}
+          </section>}
         
         <Footer />
       </div>
-    </PageTransition>
-  );
+    </PageTransition>;
 };
-
 export default Index;
